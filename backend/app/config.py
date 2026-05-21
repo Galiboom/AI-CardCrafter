@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4.1-mini"
     app_database_url: str = "sqlite:///./ai_card_crafter.db"
     allow_mock_stream: bool = True
+    vercel: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

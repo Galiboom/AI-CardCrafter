@@ -1,13 +1,19 @@
 import sqlite3
 from pathlib import Path
+from contextlib import suppress
 
 from .config import settings
 from .schemas import CardPayload, GenerateRequest
 
 
 def database_path() -> Path:
+    if settings.vercel and settings.app_database_url == "sqlite:///./ai_card_crafter.db":
+        return Path("/tmp/ai_card_crafter.db")
     if settings.app_database_url.startswith("sqlite:///"):
-        return Path(settings.app_database_url.replace("sqlite:///", "", 1))
+        configured_path = settings.app_database_url.replace("sqlite:///", "", 1)
+        if configured_path.startswith("/"):
+            return Path(configured_path)
+        return Path(configured_path)
     return Path("ai_card_crafter.db")
 
 
@@ -42,3 +48,13 @@ def save_generation(request: GenerateRequest, payload: CardPayload) -> None:
                 payload.model_dump_json(by_alias=True),
             ),
         )
+
+
+def safe_init_db() -> None:
+    with suppress(sqlite3.Error, OSError):
+        init_db()
+
+
+def safe_save_generation(request: GenerateRequest, payload: CardPayload) -> None:
+    with suppress(sqlite3.Error, OSError):
+        save_generation(request, payload)

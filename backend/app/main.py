@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 
 from .ai import generate_card_payload, sse, stream_payload_as_patches
 from .config import settings
-from .db import init_db, save_generation
+from .db import safe_init_db, safe_save_generation
 from .schemas import GenerateRequest
 
 
@@ -23,7 +23,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    init_db()
+    safe_init_db()
 
 
 @app.get("/api/health")
@@ -40,7 +40,7 @@ async def generate_stream(request: GenerateRequest) -> StreamingResponse:
     async def event_source() -> AsyncGenerator[str, None]:
         try:
             payload = await generate_card_payload(request)
-            save_generation(request, payload)
+            safe_save_generation(request, payload)
 
             async for event in stream_payload_as_patches(payload):
                 yield event
