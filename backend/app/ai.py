@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from collections.abc import AsyncGenerator
 
 import httpx
@@ -92,14 +93,21 @@ async def stream_payload_as_patches(payload: CardPayload) -> AsyncGenerator[str,
 
 
 def mock_payload(request: GenerateRequest) -> CardPayload:
+    keyword = normalize_keyword(request.prompt)
+    colors = {
+        "xiaohongshu": {"from": "#fb7185", "to": "#f97316"},
+        "tech": {"from": "#06b6d4", "to": "#2563eb"},
+        "commerce": {"from": "#f59e0b", "to": "#ef4444"},
+    }
+
     if request.templateId == "tech":
         return CardPayload.model_validate(
             {
-                "title": "夜跑防雨系统",
-                "subtitle": "白色轻量运动鞋",
-                "content": "高密防泼水鞋面、稳定抓地纹路与夜间反光识别，把雨后夜跑变成更轻、更稳、更安心的城市训练体验。",
-                "tags": ["#WaterReady", "#NightRun", "#UrbanGear"],
-                "themeColor": {"from": "#06b6d4", "to": "#2563eb"},
+                "title": truncate_title(f"{keyword}方案"),
+                "subtitle": f"{keyword}智能营销卡片",
+                "content": f"围绕「{request.prompt}」提炼核心卖点，用清晰结构展示价值、场景和转化理由，让用户快速理解为什么现在就值得关注。",
+                "tags": ["#AIContent", "#Growth", f"#{keyword[:8]}"],
+                "themeColor": colors["tech"],
                 "emojiIcon": "⚡",
             }
         )
@@ -107,25 +115,38 @@ def mock_payload(request: GenerateRequest) -> CardPayload:
     if request.templateId == "commerce":
         return CardPayload.model_validate(
             {
-                "title": "防雨白鞋爆款",
-                "subtitle": "夜跑通勤一双搞定",
-                "content": "高颜值白色鞋身配防泼水科技，雨后路面也能清爽开跑。限时上新福利，适合通勤、健身和日常穿搭。",
-                "tags": ["限时上新", "防泼水", "夜跑推荐"],
-                "themeColor": {"from": "#f59e0b", "to": "#ef4444"},
+                "title": truncate_title(f"{keyword}热卖"),
+                "subtitle": f"{keyword}限时主推",
+                "content": f"把「{request.prompt}」包装成清晰的购买理由，突出利益点、使用场景和行动暗示，适合商品主图和促销卡片。",
+                "tags": ["限时主推", "卖点提炼", keyword[:8]],
+                "themeColor": colors["commerce"],
                 "emojiIcon": "🔥",
             }
         )
 
     return CardPayload.model_validate(
         {
-            "title": "雨夜也发光",
-            "subtitle": "高颜值白色防雨跑鞋",
-            "content": "防泼水鞋面不怕小雨，轻盈脚感适合夜跑和通勤。反光细节让夜间更醒目，白色外观随手一拍都很出片。",
-            "tags": ["#好物推荐", "#夜跑神器", "#白鞋穿搭"],
-            "themeColor": {"from": "#fb7185", "to": "#f97316"},
+            "title": truncate_title(f"{keyword}种草"),
+            "subtitle": f"{keyword}高转化灵感",
+            "content": f"根据「{request.prompt}」生成一张更适合社媒传播的种草卡片，语气轻快、卖点明确，适合封面、笔记和短内容预览。",
+            "tags": ["#好物推荐", "#内容灵感", f"#{keyword[:8]}"],
+            "themeColor": colors["xiaohongshu"],
             "emojiIcon": "✨",
         }
     )
+
+
+def normalize_keyword(prompt: str) -> str:
+    words = re.findall(r"[\u4e00-\u9fa5A-Za-z0-9]+", prompt)
+    if not words:
+        return "营销卡片"
+
+    keyword = "".join(words)
+    return keyword[:10] or "营销卡片"
+
+
+def truncate_title(title: str) -> str:
+    return title[:15]
 
 
 def sse(data: dict) -> str:

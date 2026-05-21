@@ -31,6 +31,8 @@ async def health() -> dict[str, str | bool]:
     return {
         "status": "ok",
         "model": settings.openai_model,
+        "baseUrl": settings.openai_base_url,
+        "hasApiKey": bool(settings.openai_api_key),
         "usingMock": not bool(settings.openai_api_key),
     }
 
