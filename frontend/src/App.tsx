@@ -61,7 +61,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen min-h-[720px] overflow-hidden bg-[#eef1f6] text-slate-950 max-xl:h-auto max-xl:min-h-screen max-xl:flex-col max-xl:overflow-auto">
+    <div className="flex h-screen min-h-[720px] overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(20,184,166,.12),transparent_28%),linear-gradient(135deg,#f8fafc_0%,#eef2f7_48%,#e8eef7_100%)] text-slate-950 max-xl:h-auto max-xl:min-h-screen max-xl:flex-col max-xl:overflow-auto">
       <ControlPanel onExport={handleExport} />
       <LivePreview cardRef={cardRef} />
     </div>

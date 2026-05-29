@@ -72,6 +72,10 @@ button:disabled {
   animation: field-pulse 1.5s ease-in-out infinite;
 }
 
+.is-streaming-field::selection {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .exporting-card {
   box-shadow: none !important;
 }

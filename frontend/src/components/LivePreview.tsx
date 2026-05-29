@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { BadgePercent, CircleDollarSign, Cpu, Hash, Sparkles } from 'lucide-react'
+import { templateMap } from '../data/templates'
 import { useCardStore } from '../store/cardStore'
 import { cn } from '../lib/utils'
 
@@ -14,28 +15,39 @@ function LivePreviewComponent({ cardRef }: LivePreviewProps) {
   const activeField = useCardStore((state) => state.activeField)
   const isExporting = useCardStore((state) => state.isExporting)
   const isGenerating = generationStatus === 'streaming'
+  const activeTemplate = templateMap[templateId]
 
   return (
-    <main className="flex min-h-0 flex-1 flex-col bg-[#eef1f6]">
-      <div className="flex items-center justify-between border-b border-slate-200 bg-white/75 px-5 py-3 backdrop-blur">
-        <div>
-          <p className="text-sm font-bold text-slate-950">Live Preview Canvas</p>
-          <p className="text-xs text-slate-500">4:3 marketing card, controlled by schema</p>
+    <main className="flex min-h-0 flex-1 flex-col bg-[#edf1f7]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-5 py-3 backdrop-blur">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-slate-950">实时渲染画布</p>
+          <p className="mt-0.5 text-xs text-slate-500">4:3 营销卡片 · {activeTemplate.name}</p>
         </div>
-        <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200">
-          <span
-            className={cn(
-              'h-2 w-2 rounded-full',
-              isGenerating ? 'animate-pulse bg-emerald-500' : 'bg-slate-300',
-            )}
-          />
-          {isGenerating ? 'AI streaming' : 'Ready'}
+        <div className="flex items-center gap-2">
+          <div className="hidden rounded-md bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 sm:block">
+            1200 x 900 export frame
+          </div>
+          <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200">
+            <span
+              className={cn(
+                'h-2 w-2 rounded-full',
+                isGenerating ? 'animate-pulse bg-emerald-500' : isExporting ? 'bg-amber-500' : 'bg-slate-300',
+              )}
+            />
+            {isGenerating ? 'AI 流式写入' : isExporting ? '图片导出中' : '画布就绪'}
+          </div>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 place-items-center overflow-auto px-5 py-8">
-        <div className="w-full max-w-[880px]">
-          <div className="mx-auto aspect-[4/3] w-full">
+      <div className="relative grid min-h-0 flex-1 place-items-center overflow-auto px-5 py-8">
+        <div className="absolute inset-0 opacity-80 [background-image:linear-gradient(rgba(15,23,42,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,.045)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="relative w-full max-w-[900px]">
+          <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold text-slate-500">
+            <span>Preview / {activeTemplate.shortName}</span>
+            <span>{payload.title || '未命名卡片'}</span>
+          </div>
+          <div className="mx-auto aspect-[4/3] w-full rounded-[10px] bg-white/70 p-2 shadow-[0_28px_90px_rgba(15,23,42,.18)] ring-1 ring-white">
             <article
               ref={cardRef}
               className={cn(
